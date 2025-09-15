@@ -11,6 +11,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class CinemaHallSerializer(serializers.ModelSerializer):
+    capacity = serializers.ReadOnlyField()
+
     class Meta:
         model = CinemaHall
         fields = ("id", "name", "rows", "seats_in_row", "capacity")
@@ -47,10 +49,7 @@ class MovieListSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field="name"
     )
-    actors = serializers.StringRelatedField(
-        many=True,
-        read_only=True
-    )
+    actors = serializers.SerializerMethodField()
 
     class Meta:
         model = Movie
@@ -62,6 +61,10 @@ class MovieListSerializer(serializers.ModelSerializer):
             "genres",
             "actors",
         )
+
+    def get_actors(self, obj):
+        return [f"{actor.first_name} {actor.last_name}"
+                for actor in obj.actors.all()]
 
 
 class MovieRetrieveSerializer(MovieSerializer):
